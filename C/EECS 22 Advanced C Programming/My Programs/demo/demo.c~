@@ -1,0 +1,15 @@
+/* Program: demo.c */
+/* Purpose: test code */
+
+#include <stdio.h>
+
+const int SLEN = 80;
+
+int main(void)
+{
+  char usrname[SLEN] = "Marcos";
+  printf("Hello, %20s", usrname);
+
+}
+
+/* EOF */
