@@ -1,0 +1,136 @@
+/* typedef, pointers, and one-dimensional accessing */
+#define DEBUG
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+typedef struct
+{
+    unsigned int W;   /* Image Width */
+    unsigned int H;   /* Image Height */
+    unsigned char *G; /* pointer to the memory storing the grayscale values */
+} IMAGE;
+
+IMAGE *CreateImage(unsigned int Width,
+                   unsigned int Height);
+IMAGE *DeleteImage(IMAGE *image);
+void SetPixelG(IMAGE *image,
+                unsigned int x,
+                unsigned int y,
+                unsigned char g);
+unsigned char GetPixelG(const IMAGE *image,
+                        unsigned int x,
+                        unsigned int y);
+unsigned int ImageWidth(const IMAGE *image);
+unsigned int ImageHeight(const IMAGE *image);
+
+int main(void)
+{
+    int x, y, n=0;
+    int Width = 10;
+    int Height = 5;
+    IMAGE *image = NULL;
+    unsigned char grayscale[Width][Height];
+    
+    image = CreateImage(Width, Height);
+    
+    /* generate local image array */
+    for (y = 0; y < ImageHeight(image); y++)
+        for (x = 0; x < ImageWidth(image); x++)
+        {
+            grayscale[x][y] = n;
+            n++;
+        }
+    
+    /* upload local image to heap */
+    for (y = 0; y < ImageHeight(image); y++)
+        for (x = 0; x < ImageWidth(image); x++)
+        {
+            SetPixelG(image, x, y, grayscale[x][y]);
+        }
+
+    /* Bytes of memory usage */
+    printf("sizeof(unsigned char) [bytes] = %ld \n", sizeof(unsigned char));
+    printf("sizeof(image->W)      [bytes] = %ld \n", sizeof(image->W));
+    printf("sizeof(image->H)      [bytes] = %ld \n", sizeof(image->H));
+    printf("sizeof(image->G)      [bytes] = %ld \n", sizeof(image->G));
+    printf("sizeof(grayscale)     [bytes] = %ld \n\n", sizeof(grayscale));
+
+
+    /* Accessing content with pointer and 1D access */;
+    printf("image->W = %d \n", image->W);
+    printf("image->H = %d \n", image->H);
+    printf("image->G = %p \n", image->G);
+    for (y = 0; y < Height; y++)
+        for (x = 0; x < Width; x++)
+        {
+            printf("GetPixelG(image, x, y) = %d \n", GetPixelG(image, x, y));
+        }
+
+    /* Delete image structure from image and set image pointer to 0 */
+    DeleteImage(image);
+    image = NULL;
+
+    return 0;
+}
+
+IMAGE *CreateImage(unsigned int Width,
+                   unsigned int Height)
+{
+    IMAGE *image;
+    
+    /* Create and initialize image struct instance */
+    image = malloc(sizeof(IMAGE));
+    assert(image);
+    image->W = Width;
+    image->H = Height;
+    image->G = malloc(Width * Height * sizeof(unsigned char));
+    assert(image->G);
+    return image;
+}
+
+IMAGE *DeleteImage(IMAGE *image)
+{
+    assert(image && image->G);
+    free(image->G);
+    image->G = NULL;
+    free(image);
+    return image;
+}
+
+void SetPixelG(IMAGE *image,
+                unsigned int x,
+                unsigned int y,
+                unsigned char g)
+{
+    unsigned char *ptr = NULL;
+    
+    assert(image);
+    ptr = image->G + x + y * ImageWidth(image);
+    #ifdef DEBUG
+        printf("For x = %d, y = %d, ptr = %p \n", x, y, ptr);
+    #endif /* DEBUG */
+    *ptr = g;
+}
+
+unsigned char GetPixelG(const IMAGE *image,
+                        unsigned int x,
+                        unsigned int y)
+{
+    unsigned char *ptr = NULL;
+    assert(image);
+    ptr = image->G + x + y * ImageWidth(image);
+    return *ptr;
+}
+
+unsigned int ImageWidth(const IMAGE *image)
+{
+    assert(image);
+    return image->W;
+}
+
+unsigned int ImageHeight(const IMAGE *image)
+{
+    assert(image);
+    return image->H;
+}
